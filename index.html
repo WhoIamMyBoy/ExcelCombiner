@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ms" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel Combiner Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F0FDFA;
+  --surface: #FFFFFF;
+  --surface2: #E8F1F4;
+  --text: #134E4A;
+  --text2: #5B7B78;
+  --border: #99F6E4;
+  --primary: #0D9488;
+  --primary-hover: #0F766E;
+  --secondary: #14B8A6;
+  --accent: #EA580C;
+  --accent-hover: #D4550A;
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --warning: #D97706;
+  --warning-bg: #FFFBEB;
+  --radius: 8px;
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --transition: 200ms ease;
+}
+[data-theme="dark"] {
+  --bg: #0F172A;
+  --surface: #1E293B;
+  --surface2: #334155;
+  --text: #F1F5F9;
+  --text2: #94A3B8;
+  --border: #334155;
+  --primary: #14B8A6;
+  --primary-hover: #2DD4BF;
+  --secondary: #5EEAD4;
+  --accent: #FB923C;
+  --accent-hover: #FDBA74;
+  --danger: #FCA5A5;
+  --danger-bg: #451A1A;
+  --success: #6EE7B7;
+  --success-bg: #0F2E1E;
+  --warning: #FBBF24;
+  --warning-bg: #2E2415;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 1rem;
+  min-height: 100vh;
+}
+#app { max-width: 1400px; margin: 0 auto; }
+
+/* Header */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+header h1 { font-size: 1.4rem; color: var(--primary); font-weight: 700; }
+.header-controls { display: flex; align-items: center; gap: 1rem; }
+.credit { font-size: 0.8rem; color: var(--text2); }
+#themeToggle {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--text);
+  transition: var(--transition);
+}
+#themeToggle:hover { background: var(--border); }
+
+/* Main grid */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 1.2rem;
+}
+.panel h3 { font-size: 1rem; margin-bottom: 0.8rem; color: var(--primary); display: flex; align-items: center; gap: 0.4rem; }
+
+/* Upload */
+.file-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.8rem; min-height: 2rem; max-height: 200px; overflow-y: auto; }
+.file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  padding: 0.4rem 0.7rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+.file-item .file-info { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; }
+.file-item .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-item .file-rows { color: var(--text2); font-size: 0.75rem; white-space: nowrap; }
+.file-item .remove-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.1rem 0.3rem;
+  line-height: 1;
+  border-radius: 3px;
+}
+.file-item .remove-btn:hover { background: rgba(220,53,69,0.1); }
+.file-item.dragging { opacity: 0.5; border-color: var(--primary); }
+.file-item.drag-over { border-color: var(--primary); background: rgba(0,102,204,0.08); }
+
+.btn-secondary {
+  background: var(--surface2);
+  border: 1px dashed var(--border);
+  color: var(--text);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  width: 100%;
+  transition: var(--transition);
+}
+.btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+.warning {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  color: var(--text);
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* Settings */
+.setting {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+.setting label { font-size: 0.85rem; color: var(--text2); min-width: 100px; }
+.setting select, .setting input[type="text"] {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.setting input[type="range"] { flex: 1; min-width: 80px; accent-color: var(--primary); }
+.setting .range-value { font-size: 0.85rem; font-weight: bold; min-width: 2rem; text-align: right; }
+
+/* Conflict Section */
+.conflict-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.conflict-item .conflict-header { font-weight: bold; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--warning); }
+.conflict-item .conflict-options { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; }
+.conflict-item .conflict-options label {
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  transition: 0.1s;
+}
+.conflict-item .conflict-options label:hover { background: var(--bg); }
+.conflict-item .conflict-options input[type="radio"] { accent-color: var(--primary); }
+.btn-apply-conflicts {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  transition: var(--transition);
+}
+.btn-apply-conflicts:hover { background: var(--primary-hover); }
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 150px;
+  color: var(--text2);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Column Order */
+.column-order-section {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+}
+.column-order-section h3 { font-size: 1rem; margin-bottom: 0.8rem; color: var(--primary); display: flex; align-items: center; gap: 0.4rem; }
+.column-list { display: flex; flex-direction: column; gap: 0.35rem; max-height: 250px; overflow-y: auto; }
+.column-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  padding: 0.45rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  cursor: grab;
+  transition: var(--transition);
+}
+.column-item:active { cursor: grabbing; }
+.column-item.dragging { opacity: 0.5; border-color: var(--primary); }
+.column-item.drag-over { border-color: var(--primary); background: rgba(0,102,204,0.08); }
+.column-item .col-name { flex: 1; }
+.column-item .col-order { color: var(--text2); font-size: 0.75rem; margin-right: 0.5rem; }
+.column-item .col-actions { display: flex; gap: 0.25rem; }
+.btn-sort {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--text2);
+  transition: var(--transition);
+  line-height: 1.2;
+}
+.btn-sort:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.btn-sort:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Preview */
+.preview-section {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.preview-section h3 { font-size: 1rem; margin-bottom: 0.8rem; color: var(--primary); display: flex; align-items: center; gap: 0.4rem; }
+.preview-section .preview-info { font-size: 0.8rem; color: var(--text2); margin-bottom: 0.5rem; }
+#previewContainer {
+  overflow: auto;
+  max-height: 450px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+/* Simple table */
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.preview-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface2);
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  color: var(--text);
+}
+.preview-table td {
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.preview-table tr:nth-child(even) td { background: var(--surface2); }
+.preview-table tr:hover td { background: var(--border); }
+/* Grid (Excel-like) table */
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.grid-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface2);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  color: var(--text);
+  font-size: 0.78rem;
+}
+.grid-table td {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.grid-table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+[data-theme="dark"] .grid-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+.grid-table tr:hover td { background: var(--surface2); }
+[data-theme="dark"] .grid-table tr:hover td { background: var(--surface2); }
+.grid-table .row-num {
+  color: var(--text2);
+  text-align: center;
+  width: 2.5rem;
+  min-width: 2.5rem;
+  font-size: 0.7rem;
+  user-select: none;
+  background: var(--surface2) !important;
+}
+
+/* Download */
+.download-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.btn-download {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.9rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-download:hover { background: var(--primary-hover); }
+.btn-download:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Focus states */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible) { outline: none; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  body { padding: 0.5rem; }
+  .main-grid { grid-template-columns: 1fr; }
+  header { flex-wrap: wrap; gap: 0.5rem; }
+  header h1 { font-size: 1.1rem; }
+  .setting { flex-direction: column; align-items: stretch; }
+  .setting label { min-width: auto; }
+  .preview-table td, .grid-table td { max-width: 120px; font-size: 0.75rem; }
+  .btn-download { width: 100%; padding: 0.8rem 1.5rem; }
+  .file-item { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  .preview-table td, .grid-table td { max-width: 80px; font-size: 0.7rem; }
+  .column-item { flex-wrap: wrap; }
+  .conflict-item .conflict-options { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+      Excel Combiner Pro
+    </h1>
+    <div class="header-controls">
+      <span class="credit">Credit to OwN</span>
+      <button id="themeToggle" title="Toggle theme">
+        <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <div class="panel left-panel">
+      <section class="upload-section">
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload Files</h3>
+        <div class="file-list" id="fileList"><div class="placeholder" style="min-height:auto;padding:0.3rem;font-size:0.8rem">No files uploaded</div></div>
+        <button class="btn-secondary" id="addFileBtn">+ Tambah Fail</button>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" multiple style="display:none">
+        <div id="warningMsg" class="warning" style="display:none"></div>
+      </section>
+      <section class="settings-section" style="margin-top:1rem">
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</h3>
+        <div class="setting">
+          <label>Merge Mode:</label>
+          <select id="mergeMode">
+            <option value="row">Row-by-Row (Max Length)</option>
+            <option value="append">Append (Cantum Hujung)</option>
+          </select>
+        </div>
+        <div class="setting">
+          <label>Preview View:</label>
+          <select id="viewMode">
+            <option value="simple">Simple Table</option>
+            <option value="grid">Grid (Excel-like)</option>
+          </select>
+        </div>
+        <div class="setting">
+          <label>Preview Rows:</label>
+          <input type="range" id="previewCount" min="5" max="200" step="5" value="10">
+          <span class="range-value" id="previewCountLabel">10</span>
+        </div>
+        <div class="setting">
+          <label>Output Name:</label>
+          <select id="outputNamePreset">
+            <option value="hasil_gabungan">hasil_gabungan</option>
+            <option value="firstfile">[Fail1]_gabung</option>
+            <option value="date">gabungan_[tarikh]</option>
+            <option value="custom">Kustom...</option>
+          </select>
+        </div>
+        <div class="setting" id="customNameWrap" style="display:none">
+          <label>Custom Name:</label>
+          <input type="text" id="outputNameCustom" value="hasil_gabungan">
+        </div>
+        <div class="setting">
+          <label>Conflict Default:</label>
+          <select id="conflictDefault">
+            <option value="ask">Tanya setiap kali</option>
+            <option value="first">Auto: Fail pertama</option>
+            <option value="last">Auto: Fail terakhir</option>
+            <option value="both">Auto: Simpan semua</option>
+          </select>
+        </div>
+      </section>
+    </div>
+
+    <div class="panel right-panel">
+      <div id="rightContent">
+        <div class="placeholder" id="rightPlaceholder">Upload files to begin</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="column-order-section" id="columnOrderSection" style="display:none">
+    <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Column Order</h3>
+    <p style="font-size:0.8rem;color:var(--text2);margin-bottom:0.5rem">Drag items or use ▲/▼ buttons to reorder columns for the output file.</p>
+    <div class="column-list" id="columnList"></div>
+  </section>
+
+  <section class="preview-section" id="previewSection" style="display:none">
+    <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview</h3>
+    <div class="preview-info" id="previewInfo"></div>
+    <div id="previewContainer"></div>
+  </section>
+
+  <div class="download-section" id="downloadSection" style="display:none">
+    <button class="btn-download" id="downloadBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Muat Turun Excel</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * EXCEL COMBINER PRO v1.0
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DESCRIPTION:
+ *   Advanced single-page tool to combine multiple Excel files
+ *   (.xlsx/.xls) with full control over column ordering, conflict
+ *   resolution, preview, and theme.
+ *
+ * LIBRARIES:
+ *   - SheetJS (xlsx) 0.18.5 — https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js
+ *     Required for reading/writing Excel files. Loaded via CDN in <head>.
+ *
+ * FILE STRUCTURE (this script):
+ *   1. State object (app) — all reactive data
+ *   2. Utility functions — DOM helpers, ID generation
+ *   3. Theme system — light/dark toggle with localStorage
+ *   4. File handling — upload, parse, add, remove
+ *   5. Conflict detection & resolution — find duplicate headers, let user choose
+ *   6. Column ordering — drag & drop + ▲/▼ buttons
+ *   7. Preview — simple table or Excel-like grid table
+ *   8. Settings — merge mode, view mode, preview count, output name, conflict default
+ *   9. Download — merge data using all settings and output .xlsx
+ *   10. Event listeners & initialization
+ *
+ * STATE (app object):
+ *   app.files           — Array<{id, name, headers[], rows[]}>
+ *   app.settings        — { mergeMode, viewMode, previewCount, outputName, conflictDefault }
+ *   app.conflicts       — [{ header, sources: [fileIdx...] }]
+ *   app.conflictChoices — { [header]: { type: 'pick'|'all', pickIdx: number } }
+ *   app.headerMappings  — [{ finalName, sourceFileIdx, sourceName }]
+ *   app.orderedHeaders  — string[] (derived from headerMappings)
+ *   app.previewData     — Object[] (first N rows of merged result)
+ *
+ * MERGE MODES:
+ *   "row"    — Row-by-Row: iterate i=0..maxLen-1, gather row[i] from each file
+ *   "append" — Append: concatenate all rows from all files sequentially
+ *
+ * CONFLICT RESOLUTION:
+ *   When 2+ files share the same header name, user can:
+ *   - Pick data from one specific file (type:'pick', pickIdx:N)
+ *   - Keep all with prefix (type:'all') → "[A] Name", "[B] Name", etc.
+ *   If conflictDefault != "ask", auto-apply without user interaction.
+ *
+ * THEME:
+ *   "light" (default) or "dark". Toggle button saves to localStorage.
+ *
+ * OUTPUT:
+ *   Single .xlsx file with one sheet named "Hasil_Gabung".
+ *   File name configurable via settings.
+ *   Credit to OwN.
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+// ──── State ────
+const app = {
+  files: [],
+  settings: {
+    mergeMode: 'row',
+    viewMode: 'simple',
+    previewCount: 10,
+    outputName: 'hasil_gabungan',
+    conflictDefault: 'ask',
+  },
+  conflicts: [],
+  conflictChoices: {},
+  headerMappings: [],
+  orderedHeaders: [],
+  previewData: [],
+  warnings: [],
+};
+
+let fileIdCounter = 0;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// ──── Theme ────
+function initTheme() {
+  const saved = localStorage.getItem('ecp_theme');
+  if (saved === 'dark') { document.documentElement.setAttribute('data-theme','dark'); setThemeIcon(true); }
+}
+function setThemeIcon(isDark) {
+  const btn = $('themeToggle');
+  btn.querySelector('.icon-sun').style.display = isDark ? 'none' : '';
+  btn.querySelector('.icon-moon').style.display = isDark ? '' : 'none';
+}
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  setThemeIcon(!isDark);
+  localStorage.setItem('ecp_theme', isDark ? 'light' : 'dark');
+}
+
+// ──── File Handling ────
+function getOutputName() {
+  const preset = $('outputNamePreset').value;
+  if (preset === 'firstfile' && app.files.length > 0) {
+    const name = app.files[0].name.replace(/\.(xlsx|xls)$/i, '');
+    return name + '_gabung';
+  }
+  if (preset === 'date') {
+    const d = new Date();
+    const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    return 'gabungan_' + ds;
+  }
+  if (preset === 'custom') return $('outputNameCustom').value.trim() || 'hasil_gabungan';
+  return 'hasil_gabungan';
+}
+
+function addFiles(fileList) {
+  app.warnings = [];
+  for (const file of fileList) {
+    if (app.files.some(f => f.name === file.name)) {
+      app.warnings.push(`"${file.name}" sudah dimuat naik.`);
+      continue;
+    }
+    if (!file.name.match(/\.(xlsx?|csv)$/i)) {
+      app.warnings.push(`"${file.name}" bukan fail Excel/CSV.`);
+      continue;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        const sn = wb.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], { defval: '' });
+        if (!rows || rows.length === 0) {
+          app.warnings.push(`"${file.name}" kosong.`);
+          showWarnings();
+          return;
+        }
+        const headers = Object.keys(rows[0]);
+        app.files.push({ id: ++fileIdCounter, name: file.name, headers, rows });
+        afterFileChange();
+      } catch (err) {
+        app.warnings.push(`"${file.name}": ${err.message}`);
+        showWarnings();
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  if (app.warnings.length) showWarnings();
+}
+
+function removeFile(id) {
+  app.files = app.files.filter(f => f.id !== id);
+  afterFileChange();
+}
+
+function afterFileChange() {
+  detectConflicts();
+  applyConflictDefault();
+  buildHeaderMappings();
+  renderAll();
+}
+
+function showWarnings() {
+  const el = $('warningMsg');
+  const items = [];
+  if (app.warnings.length) items.push(...app.warnings);
+  if (app.files.length >= 10) items.push('Anda telah memuat naik 10 atau lebih fail. Sila semak semula.');
+  if (items.length) {
+    el.innerHTML = items.map(w => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ' + esc(w)).join('<br>');
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ──── Conflict Detection ────
+function detectConflicts() {
+  app.conflicts = [];
+  if (app.files.length < 2) return;
+  const headerMap = {};
+  app.files.forEach((f, idx) => {
+    f.headers.forEach(h => {
+      if (!headerMap[h]) headerMap[h] = [];
+      headerMap[h].push(idx);
+    });
+  });
+  for (const [header, sources] of Object.entries(headerMap)) {
+    if (sources.length > 1) {
+      app.conflicts.push({ header, sources });
+    }
+  }
+}
+
+function applyConflictDefault() {
+  const def = app.settings.conflictDefault;
+  app.conflictChoices = {};
+  if (def === 'ask') return;
+  const suffix = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (const c of app.conflicts) {
+    if (def === 'first') {
+      app.conflictChoices[c.header] = { type: 'pick', pickIdx: c.sources[0] };
+    } else if (def === 'last') {
+      app.conflictChoices[c.header] = { type: 'pick', pickIdx: c.sources[c.sources.length - 1] };
+    } else if (def === 'both') {
+      app.conflictChoices[c.header] = { type: 'all' };
+    }
+  }
+}
+
+// ──── Header Mapping ────
+function buildHeaderMappings() {
+  app.headerMappings = [];
+  if (app.files.length === 0) { app.orderedHeaders = []; return; }
+  const suffix = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const seen = new Set();
+
+  for (let fi = 0; fi < app.files.length; fi++) {
+    const f = app.files[fi];
+    for (const h of f.headers) {
+      const conflict = app.conflicts.find(c => c.header === h);
+      if (!conflict) {
+        if (!seen.has(h)) {
+          seen.add(h);
+          app.headerMappings.push({ finalName: h, sourceFileIdx: fi, sourceName: h });
+        }
+      } else {
+        if (app.conflictChoices[h]) {
+          const choice = app.conflictChoices[h];
+          if (choice.type === 'pick') {
+            const fn = h;
+            if (!seen.has(fn)) {
+              seen.add(fn);
+              app.headerMappings.push({ finalName: fn, sourceFileIdx: choice.pickIdx, sourceName: h });
+            }
+          } else if (choice.type === 'all') {
+            for (const si of conflict.sources) {
+              const sf = suffix[si] || `F${si+1}`;
+              const fn = `[${sf}] ${h}`;
+              if (!seen.has(fn)) {
+                seen.add(fn);
+                app.headerMappings.push({ finalName: fn, sourceFileIdx: si, sourceName: h });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  app.orderedHeaders = app.headerMappings.map(m => m.finalName);
+}
+
+// ──── Merge & Preview Data ────
+function generateMergedData(maxRows) {
+  if (app.files.length === 0 || app.headerMappings.length === 0) return [];
+  const mode = app.settings.mergeMode;
+  const limit = maxRows || Infinity;
+  const result = [];
+
+  if (mode === 'row') {
+    const maxLen = Math.max(...app.files.map(f => f.rows.length));
+    const count = Math.min(maxLen, limit);
+    for (let i = 0; i < count; i++) {
+      const row = {};
+      for (const m of app.headerMappings) {
+        const sourceRow = app.files[m.sourceFileIdx].rows[i] || {};
+        row[m.finalName] = sourceRow[m.sourceName] ?? '';
+      }
+      result.push(row);
+    }
+  } else if (mode === 'append') {
+    let total = 0;
+    for (const f of app.files) total += f.rows.length;
+    const count = Math.min(total, limit);
+    let written = 0;
+    for (const f of app.files) {
+      for (const rowData of f.rows) {
+        if (written >= count) break;
+        const row = {};
+        for (const m of app.headerMappings) {
+          row[m.finalName] = (m.sourceFileIdx === app.files.indexOf(f)) ? (rowData[m.sourceName] ?? '') : '';
+        }
+        result.push(row);
+        written++;
+      }
+      if (written >= count) break;
+    }
+  }
+  return result;
+}
+
+function generateFullData() {
+  return generateMergedData(Infinity);
+}
+
+// ──── Rendering ────
+function renderAll() {
+  renderFileList();
+  renderConflictSection();
+  renderColumnOrder();
+  renderPreview();
+  renderDownload();
+  showWarnings();
+}
+
+function renderFileList() {
+  const el = $('fileList');
+  if (app.files.length === 0) {
+    el.innerHTML = '<div class="placeholder" style="min-height:auto;padding:0.3rem;font-size:0.8rem">No files uploaded</div>';
+    return;
+  }
+  el.innerHTML = app.files.map((f, i) => `
+    <div class="file-item" draggable="true" data-file-id="${f.id}">
+      <div class="file-info">
+        <span class="file-name">${esc(f.name)}</span>
+        <span class="file-rows">${f.rows.length} rows · ${f.headers.length} cols</span>
+      </div>
+      <button class="remove-btn" data-id="${f.id}" title="Remove">✕</button>
+    </div>
+  `).join('');
+  el.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => removeFile(Number(btn.dataset.id)));
+  });
+  // File drag reorder
+  let dragId = null;
+  el.querySelectorAll('.file-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragId = Number(item.dataset.fileId);
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      el.querySelectorAll('.file-item').forEach(el => el.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    item.addEventListener('dragenter', e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      const targetId = Number(item.dataset.fileId);
+      if (dragId !== null && dragId !== targetId) {
+        const fromIdx = app.files.findIndex(f => f.id === dragId);
+        const toIdx = app.files.findIndex(f => f.id === targetId);
+        if (fromIdx !== -1 && toIdx !== -1) {
+          const [moved] = app.files.splice(fromIdx, 1);
+          app.files.splice(toIdx, 0, moved);
+          afterFileChange();
+        }
+      }
+      dragId = null;
+    });
+  });
+}
+
+function renderConflictSection() {
+  const container = $('rightContent');
+  if (app.files.length < 2 || app.conflicts.length === 0) {
+    if (app.files.length === 0) {
+      container.innerHTML = '<div class="placeholder">Upload files to begin</div>';
+    } else if (app.files.length < 2) {
+      container.innerHTML = '<div class="placeholder">Add at least 2 files to combine</div>';
+    } else {
+      container.innerHTML = '<div class="placeholder" style="color:var(--success)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> No column conflicts detected</div>';
+    }
+    return;
+  }
+  const def = app.settings.conflictDefault;
+  const suffix = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  let html = '<section class="conflict-section"><h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Conflict Resolution</h3>';
+  if (def !== 'ask') {
+    html += '<p style="font-size:0.8rem;color:var(--text2);margin-bottom:0.5rem">Auto-resolved based on default setting. Upload again or change "Conflict Default" to "Tanya" for manual control.</p>';
+  }
+  for (const c of app.conflicts) {
+    const choice = app.conflictChoices[c.header] || { type: 'pick', pickIdx: c.sources[0] };
+    html += `<div class="conflict-item"><div class="conflict-header"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> "${esc(c.header)}" ditemui di: ${c.sources.map(si => esc(app.files[si].name)).join(', ')}</div><div class="conflict-options">`;
+    c.sources.forEach((si, idx) => {
+      const checked = (choice.type === 'pick' && choice.pickIdx === si) ? 'checked' : '';
+      html += `<label><input type="radio" name="conflict_${esc(c.header)}" value="pick_${si}" ${checked}> ${esc(app.files[si].name)}</label>`;
+    });
+    const checkedAll = (choice.type === 'all') ? 'checked' : '';
+    const allLabel = c.sources.map(si => `[${suffix[si] || 'F'+(si+1)}]`).join(' ');
+    html += `<label><input type="radio" name="conflict_${esc(c.header)}" value="all" ${checkedAll}> Simpan semua ${allLabel}</label>`;
+    html += '</div></div>';
+  }
+  if (def === 'ask') {
+    html += '<button class="btn-apply-conflicts" id="applyConflictsBtn">Apply Resolutions</button>';
+  } else {
+    html += '<p style="font-size:0.8rem;color:var(--text2)">Resolutions applied automatically.</p>';
+  }
+  html += '</section>';
+  container.innerHTML = html;
+
+  if (def === 'ask') {
+    $('applyConflictsBtn')?.addEventListener('click', () => {
+      document.querySelectorAll('.conflict-item').forEach((item, ci) => {
+        const c = app.conflicts[ci];
+        if (!c) return;
+        const sel = item.querySelector('input[type="radio"]:checked');
+        if (!sel) return;
+        if (sel.value === 'all') {
+          app.conflictChoices[c.header] = { type: 'all' };
+        } else {
+          const idx = parseInt(sel.value.replace('pick_',''), 10);
+          app.conflictChoices[c.header] = { type: 'pick', pickIdx: idx };
+        }
+      });
+      buildHeaderMappings();
+      renderColumnOrder();
+      renderPreview();
+      renderDownload();
+    });
+  }
+}
+
+function renderColumnOrder() {
+  const section = $('columnOrderSection');
+  const list = $('columnList');
+  if (app.orderedHeaders.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  const len = app.orderedHeaders.length;
+  list.innerHTML = app.orderedHeaders.map((h, i) => `
+    <div class="column-item" draggable="true" data-index="${i}">
+      <span class="col-order">${i+1}.</span>
+      <span class="col-name">${esc(h)}</span>
+      <div class="col-actions">
+        <button class="btn-sort" data-dir="-1" data-idx="${i}" ${i===0?'disabled':''}>▲</button>
+        <button class="btn-sort" data-dir="1" data-idx="${i}" ${i===len-1?'disabled':''}>▼</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Drag & Drop
+  let dragSrcIdx = null;
+  list.querySelectorAll('.column-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragSrcIdx = parseInt(item.dataset.index, 10);
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', e => { item.classList.remove('dragging'); document.querySelectorAll('.column-item').forEach(el => el.classList.remove('drag-over')); });
+    item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    item.addEventListener('dragenter', e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      const targetIdx = parseInt(item.dataset.index, 10);
+      if (dragSrcIdx !== null && dragSrcIdx !== targetIdx) {
+        const arr = app.orderedHeaders;
+        const [removed] = arr.splice(dragSrcIdx, 1);
+        arr.splice(targetIdx, 0, removed);
+        app.headerMappings.splice(targetIdx, 0, app.headerMappings.splice(dragSrcIdx, 1)[0]);
+        renderColumnOrder();
+        renderPreview();
+      }
+      dragSrcIdx = null;
+    });
+  });
+
+  list.querySelectorAll('.btn-sort').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx, 10);
+      const dir = parseInt(btn.dataset.dir, 10);
+      const target = idx + dir;
+      if (target < 0 || target >= app.orderedHeaders.length) return;
+      const arr = app.orderedHeaders;
+      [arr[idx], arr[target]] = [arr[target], arr[idx]];
+      const hm = app.headerMappings;
+      [hm[idx], hm[target]] = [hm[target], hm[idx]];
+      renderColumnOrder();
+      renderPreview();
+    });
+  });
+}
+
+function renderPreview() {
+  const section = $('previewSection');
+  const container = $('previewContainer');
+  const info = $('previewInfo');
+  if (app.orderedHeaders.length === 0 || app.files.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  app.previewData = generateMergedData(app.settings.previewCount);
+  if (app.previewData.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  const totalRows = generateFullData().length;
+  info.textContent = `Showing ${app.previewData.length} of ${totalRows} rows · ${app.orderedHeaders.length} columns`;
+
+  const isGrid = app.settings.viewMode === 'grid';
+  const cls = isGrid ? 'grid-table' : 'preview-table';
+  const headers = app.orderedHeaders;
+
+  let html = `<table class="${cls}"><thead><tr>`;
+  if (isGrid) html += '<th class="row-num">#</th>';
+  html += headers.map(h => `<th>${esc(h)}</th>`).join('');
+  html += '</tr></thead><tbody>';
+  app.previewData.forEach((row, ri) => {
+    html += '<tr>';
+    if (isGrid) html += `<td class="row-num">${ri+1}</td>`;
+    html += headers.map(h => {
+      const val = row[h] !== undefined && row[h] !== null ? String(row[h]) : '';
+      return `<td title="${esc(val)}">${esc(val)}</td>`;
+    }).join('');
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderDownload() {
+  const section = $('downloadSection');
+  const btn = $('downloadBtn');
+  if (app.orderedHeaders.length === 0 || app.files.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  btn.disabled = false;
+}
+
+// ──── Download ────
+function download() {
+  const btn = $('downloadBtn');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Processing...';
+  btn.disabled = true;
+  setTimeout(() => {
+    try {
+      const fullData = generateFullData();
+      if (fullData.length === 0) { alert('Tiada data untuk dimuat turun.'); btn.textContent = origText; btn.disabled = false; return; }
+      const ws = XLSX.utils.json_to_sheet(fullData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Hasil_Gabung');
+      const name = getOutputName() + '.xlsx';
+      XLSX.writeFile(wb, name);
+      alert(`✅ Selesai! Fail "${name}" telah dimuat turun.`);
+    } catch (err) {
+      alert(`Ralat: ${err.message}`);
+    }
+    btn.textContent = origText;
+    btn.disabled = false;
+  }, 50);
+}
+
+// ──── Settings Handlers ────
+function updateSetting(key, value) {
+  app.settings[key] = value;
+  if (key === 'conflictDefault') { applyConflictDefault(); buildHeaderMappings(); renderAll(); }
+  else if (key === 'mergeMode' || key === 'viewMode' || key === 'previewCount') { renderPreview(); }
+}
+
+// ──── Init ────
+function init() {
+  initTheme();
+
+  // File upload
+  $('addFileBtn').addEventListener('click', () => $('fileInput').click());
+  $('fileInput').addEventListener('change', e => {
+    if (e.target.files.length) { addFiles(e.target.files); e.target.value = ''; }
+  });
+  // Drag & drop upload — scoped to app area
+  const appEl = $('app');
+  appEl.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+  appEl.addEventListener('drop', e => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+
+  // Theme toggle
+  $('themeToggle').addEventListener('click', toggleTheme);
+
+  // Settings
+  $('mergeMode').addEventListener('change', e => updateSetting('mergeMode', e.target.value));
+  $('viewMode').addEventListener('change', e => { updateSetting('viewMode', e.target.value); renderPreview(); });
+  $('previewCount').addEventListener('input', e => {
+    $('previewCountLabel').textContent = e.target.value;
+    updateSetting('previewCount', parseInt(e.target.value, 10));
+  });
+  $('outputNamePreset').addEventListener('change', e => {
+    const wrap = $('customNameWrap');
+    if (e.target.value === 'custom') { wrap.style.display = 'flex'; } else { wrap.style.display = 'none'; }
+  });
+  // outputNameCustom changes handled via getOutputName() on download
+  $('conflictDefault').addEventListener('change', e => updateSetting('conflictDefault', e.target.value));
+
+  // Download
+  $('downloadBtn').addEventListener('click', download);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
